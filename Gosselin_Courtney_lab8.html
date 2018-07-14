@@ -1,0 +1,279 @@
+<html>
+	<head>
+	<meta charset="utf-8">
+	<title> COSC 114 Lab 5 </title>
+	<style>
+		html, body { margin: 0; padding: 0; overflow: hidden; };
+		<!--Courtney Gosselin 60186160 Animation-->
+	</style>
+	
+	<script src="three.js-master/build/three.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/16.3.5/Tween.min.js"></script>
+	</head>
+	<body>
+	<script type="text/javascript" >
+		var scene = new THREE.Scene();
+		var aspect = window.innerWidth/window.innerHeight;
+		var camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
+		var renderer = new THREE.WebGLRenderer();
+		
+		renderer.setSize(window.innerWidth, window.innerHeight);  
+		document.body.appendChild(renderer.domElement);
+		//Creature
+		var geoCubeHead = new THREE.BoxGeometry(5, 5, 5);
+		var geoCubeNose = new THREE.BoxGeometry(1.25, 1.25, 1.25);
+		var geoCubeBack = new THREE.BoxGeometry(6, 6, 10);
+		var geoCubeNeck = new THREE.BoxGeometry(2, 2, 2);
+		var geoCubeLeg = new THREE.BoxGeometry(2, 3.5, 2);
+		var geoCubeShoe = new THREE.BoxGeometry(2, .5, 2);
+		var materialCube = new THREE.MeshPhongMaterial( { color: "#fa9eff", shading:THREE.FlatShading } );
+		var materialCubeShoe = new THREE.MeshPhongMaterial( { color: "#000000", shading:THREE.FlatShading } );
+		var Head = new THREE.Mesh(geoCubeHead, materialCube);
+		var Nose = new THREE.Mesh(geoCubeNose, materialCube);
+		var Back = new THREE.Mesh(geoCubeBack, materialCube);
+		var Neck = new THREE.Mesh(geoCubeNeck, materialCube);
+		var Leg = new THREE.Mesh(geoCubeLeg, materialCube);
+		var Leg2 = new THREE.Mesh(geoCubeLeg, materialCube);
+		var Leg3 = new THREE.Mesh(geoCubeLeg, materialCube);
+		var Leg4 = new THREE.Mesh(geoCubeLeg, materialCube);
+		var shoe = new THREE.Mesh(geoCubeShoe, materialCubeShoe);
+		var shoe2 = new THREE.Mesh(geoCubeShoe, materialCubeShoe);
+		var shoe3 = new THREE.Mesh(geoCubeShoe, materialCubeShoe);
+		var shoe4 = new THREE.Mesh(geoCubeShoe, materialCubeShoe);
+		
+		
+		var geoDodecahedronEye = new THREE.DodecahedronGeometry(0.5,1);
+		var materialDodeEye = new THREE.MeshPhongMaterial( {
+			color: "#112647",
+			transparent: true,
+			opacity:.9,
+			shading:THREE.FlatShading
+			}) ;
+		var Eye = new THREE.Mesh(geoDodecahedronEye, materialDodeEye);
+		var Eye2 = new THREE.Mesh(geoDodecahedronEye, materialDodeEye);
+		
+		var geoDodecahedronNostril = new THREE.DodecahedronGeometry(0.1,1);
+		var materialDodeNostril = new THREE.MeshPhongMaterial( {
+			color: "#000000",
+			transparent: true,
+			opacity:.9,
+			shading:THREE.FlatShading
+			}) ;
+		var Nostril = new THREE.Mesh(geoDodecahedronNostril, materialDodeNostril);
+		var Nostril2 = new THREE.Mesh(geoDodecahedronNostril, materialDodeNostril);
+		
+		var geometryRollerBlade = new THREE.SphereGeometry( .5, 32, 32 );
+		var materialRollerBlade = new THREE.MeshPhongMaterial( { color: "#296ddb", shading:THREE.FlatShading } );
+		var RollerBlade = new THREE.Mesh(geometryRollerBlade, materialRollerBlade);
+		var RollerBlade2 = new THREE.Mesh(geometryRollerBlade, materialRollerBlade);
+		var RollerBlade3 = new THREE.Mesh(geometryRollerBlade, materialRollerBlade);
+		var RollerBlade4 = new THREE.Mesh(geometryRollerBlade, materialRollerBlade);
+		
+		var group = new THREE.Object3D();
+		group.add(Head, Nose, Back, Neck, Leg, Leg2, Leg3, Leg4, Eye, Eye2, Nostril, Nostril2, shoe, shoe2, shoe3, shoe4, RollerBlade, RollerBlade2, RollerBlade3, RollerBlade4);
+		scene.add(group);
+		
+		
+		//Moon
+		var geododecahedron = new THREE.DodecahedronGeometry(3,1);
+		var materialDode = new THREE.MeshPhongMaterial( {
+			color: "#ffaaff",
+			transparent: true,
+			opacity:.9,
+			shading:THREE.FlatShading
+			}) ;
+		var materialDode2 = new THREE.MeshPhongMaterial( {
+			color: "#27ea8c",
+			transparent: true,
+			opacity:.9,
+			shading:THREE.FlatShading
+			}); 
+		var Moon = new THREE.Mesh(geododecahedron, materialDode);
+		var Moon2 = new THREE.Mesh(geododecahedron, materialDode2);
+		var Moon3 = new THREE.Mesh(geododecahedron, materialDode2);
+		var Moon4 = new THREE.Mesh(geododecahedron, materialDode2);
+		
+		
+		//Ground and background
+		var geometryPlane = new THREE.PlaneGeometry( 10000, 10000, 10000 );
+		var materialPlane = new THREE.MeshPhongMaterial( { color: "#331a00", shading:THREE.FlatShading } );
+		var materialPlane2 = new THREE.MeshPhongMaterial( { color: "#00ffff", shading:THREE.FlatShading } );
+		var plane = new THREE.Mesh( geometryPlane, materialPlane );
+		var plane2 =new THREE.Mesh( geometryPlane, materialPlane2 );
+		
+	
+		var light = new THREE.AmbientLight( 0x404040 );
+		scene.add( light );
+	
+		
+		var spotLight = new THREE.SpotLight( 0xffffff );
+		spotLight.position.set( 100, 75, 100 );
+
+		spotLight.castShadow = true;
+
+		spotLight.shadow.mapSize.width = 1024;
+		spotLight.shadow.mapSize.height = 1024;
+
+		spotLight.shadow.camera.near = 500;
+		spotLight.shadow.camera.far = 400;
+		spotLight.shadow.camera.fov = 30;
+
+		scene.add( spotLight );
+		//Creature
+
+		
+		//Moon
+		scene.add(Moon);
+		scene.add(Moon2);
+		scene.add(Moon3);
+		scene.add(Moon4);
+		
+		//Ground and Background
+		scene.add(plane);
+		scene.add(plane2);
+		
+	
+	
+		
+		camera.position.z = 30;
+		camera.position.y = 10;
+		camera.position.x = 10;
+		camera.lookAt(Head.position); //You change it to Head from scene
+
+		//Creature
+		Head.position.set(0, 7, -10);
+		Head.__dirtyPosition = true;
+		
+		Nose.position.set(0, 6.5, -7);
+		Nose.__dirtyPosition = true;
+		
+		Back.position.set(0, 4, -17);
+		Back.__dirtyPosition = true;
+		
+		Neck.position.set(0, 4, -10);
+		Neck.__dirtyPosition = true;
+		
+		Leg.position.set(2, 0, -13);
+		Leg.__dirtyPosition = true;
+		
+		Leg2.position.set(-2, 0, -13);
+		Leg2.__dirtyPosition = true;
+		
+		Leg3.position.set(2, 0, -20);
+		Leg3.__dirtyPosition = true;
+		
+		Leg4.position.set(-2, 0, -20);
+		Leg4.__dirtyPosition = true;
+		
+		shoe.position.set(2, -2, -13);
+		shoe.__dirtyPosition = true;
+		
+		shoe2.position.set(-2, -2, -13);
+		shoe2.__dirtyPosition = true;
+		
+		shoe3.position.set(2, -2, -20);
+		shoe3.__dirtyPosition = true;
+		
+		shoe4.position.set(-2, -2, -20);
+		shoe4.__dirtyPosition = true;
+		
+		RollerBlade.position.set(2, -2.5, -13);
+		RollerBlade.__dirtyPosition = true;
+		
+		RollerBlade2.position.set(-2, -2.5, -13);
+		RollerBlade2.__dirtyPosition = true;
+		
+		RollerBlade3.position.set(2, -2.5, -20);
+		RollerBlade3.__dirtyPosition = true;
+		
+		RollerBlade4.position.set(-2, -2.5, -20);
+		RollerBlade4.__dirtyPosition = true;
+		
+		Eye.position.set(-1.5, 8, -7.5);
+		Eye.__dirtyPosition = true;
+		
+		Eye2.position.set(1.5, 8, -7.5);
+		Eye2.__dirtyPosition = true;
+		
+		Nostril.position.set(-0.5, 6.5, -6.3);
+		Nostril.__dirtyPosition = true;
+		
+		Nostril2.position.set(0.5, 6.5, -6.3);
+		Nostril2.__dirtyPosition = true;
+		
+		
+		
+		//Moon
+		Moon.position.set(-4, 14, 10);
+		Moon.__dirtyPosition = true;
+		
+		Moon2.position.set(-37, 29, -10);
+		Moon2.__dirtyPosition = true;
+		
+		Moon3.position.set(0, 14, -15);
+		Moon3.__dirtyPosition = true;
+		
+		Moon4.position.set(13, 18, -10);
+		Moon4.__dirtyPosition = true;
+	
+
+	//Ground and Background
+	/*for(var i = 0; i < plane.vertices.length, i++){
+			plane.vertices[i].z = Math.random*2;
+			}
+			Couldn't get the ground to be textured*/
+	
+	
+		plane.position.set(0.5, -3, 0.5);
+		plane.__dirtyPosition = true;
+		plane.rotation.x = -Math.PI/2;
+		plane.receiveShadow = true;	
+		
+		plane2.position.set(-600, 0, -500);			
+		plane2.__dirtyPosition = true;
+		plane2.receiveShadow = true;
+		
+		//Tweening
+		var position = { x : 0, z : -60 };
+		var target = { x : -4, z : 7 };
+		var tween = new TWEEN.Tween(position).to(target, 15000);
+
+		tween.onUpdate(function(){
+			group.position.x = position.x;
+			group.position.z = position.z;
+		});
+		
+		tween.delay(500);
+		
+		tween.easing(TWEEN.Easing.Elastic.InOut);
+		tween.start();
+		
+		//Render
+		var render = function(){
+			requestAnimationFrame(render);
+			Moon.rotation.x += 0.005;
+			Moon.rotation.y += 0.005;
+			
+			Moon2.rotation.x += 0.005;
+			Moon2.rotation.y += 0.005;
+			
+			Moon3.rotation.x += 0.005;
+			Moon3.rotation.y += 0.005;
+			
+			Moon4.rotation.x += 0.005;
+			Moon4.rotation.y += 0.005;
+			
+			//Rotating for the movement of chars rollerblades 
+			RollerBlade.rotation.y += 0.005;
+			RollerBlade2.rotation.y += 0.005;
+			RollerBlade3.rotation.y += 0.005;
+			RollerBlade4.rotation.y += 0.005;
+			
+			
+			TWEEN.update();
+			renderer.render(scene,camera);
+			}
+		render();
+	</script>
+	</body>
+</html>

@@ -1,0 +1,480 @@
+<ht<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+			<title>COSC 114 - Lab 11</title>
+			<style>
+				html, body { margin: 0 ; padding: 0; overflow: hidden; }
+			</style>
+		
+		<script src="three.js-master/build/three.js"></script>
+		<script type="text/javascript" src="http://digital-media.ok.ubc.ca/libs/threejs/StereoEffect.js"></script>
+
+	 </head>
+	  <body>
+	  <div id="world"></div>
+		<script>
+			//Courtney Gosselin 60186160 VR
+			var scene = new THREE.Scene();
+			var aspect = window.innerWidth / window.innerHeight;
+			var camera = new THREE.PerspectiveCamera( 75, aspect, 0.1, 1000);
+			 camera.position.z = -4;
+			camera.position.x = 30;
+			camera.position.y = 3;
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			document.body.appendChild(renderer.domElement);
+				
+			effect = new THREE.StereoEffect( renderer );
+			effect.setSize( window.innerWidth, window.innerHeight );
+			
+			 window.addEventListener( 'resize', onWindowResize, false );
+				
+				
+		
+			var ambiLight = new THREE.AmbientLight(0x000000, 20);
+			scene.add(ambiLight);
+			var Light = new THREE.DirectionalLight(0xffffff,1.5);
+			Light.position.x = 10;
+			Light.position.y = 10;
+			Light.position.z = 10;
+			scene.add(Light);
+			
+		var geometryDodecahedron = new THREE.DodecahedronGeometry(5,0);
+		var materialDodecahedron = new THREE.MeshPhongMaterial( { color: "#006600", shading:THREE.FlatShading } );
+		var dodecahedron = new THREE.Mesh(geometryDodecahedron, materialDodecahedron);
+		
+		dodecahedron.position.set(300, 39, 10);
+		dodecahedron.__dirtyPosition = true;
+
+		scene.add(dodecahedron);
+
+
+    // the Boid definition
+    function Boid() {
+        this.position = new THREE.Vector3(Math.random()*10, Math.random()*10, Math.random()*10) ;
+        this.velocity = new THREE.Vector3(rrand(-0.0001, 0.0001),rrand(-0.0001, 0.0001), rrand(-0.0001, 0.0001)) ;
+        this.acceleration = new THREE.Vector3(0,0,0) ;
+        this.mass = 2 ;
+        this.body = new Box() ;
+        this.PlanetMouse = new THREE.Vector3(0,10,0) ;
+        // some scalers to control the behaviour
+        this.maxforce = 0.03 ;
+        this.maxspeed = 0.1 ;
+        this.sepScale = 0.01 ;
+        this.aliScale = 0.01 ;
+        this.cohScale = 0.01 ;
+        this.PlanetMouseScale = 0.1 ;
+        scene.add(this.body.mesh);
+    }
+	
+	function Box() {
+		var geometry = new THREE.IcosahedronGeometry(0.5,0);
+		var material = new THREE.MeshPhongMaterial( 
+			{ color:0xff6754, shading:THREE.FlatShading} );
+		this.mesh = new THREE.Mesh( geometry, material );
+		this.mesh.castShadow = true ;
+	}
+
+    Boid.prototype.run = function(boids) {
+        this.flock(boids) ;
+        this.update() ;
+        this.body.mesh.position.x = this.position.x ;
+        this.body.mesh.position.y = this.position.y ;
+        this.body.mesh.position.z = this.position.z ;
+    }
+    function rrand(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    // here we add all the forces
+    Boid.prototype.flock = function(boids) {
+        var sep = this.separate(boids);   // Separation
+        var ali = this.align(boids);      // Alignment
+        var coh = this.cohesion(boids);   // Cohesion
+        var hom = this.steer(this.PlanetMouse) ;
+        // Arbitrarily weight these forces
+        sep.multiplyScalar(this.sepScale);
+        ali.multiplyScalar(this.aliScale);
+        coh.multiplyScalar(this.sepScale);
+        hom.multiplyScalar(this.homScale) ;
+        //
+        this.acceleration
+        .add(sep)
+        .add(ali)
+        .add(coh)
+        .add(hom)
+        .add(new THREE.Vector3(rrand(-0.01, 0.01), rrand(-0.01, 0.01), rrand(-0.01, 0.01)))
+        .divideScalar(this.mass) ;
+		console.log(this.acceleration);
+    }
+    // update the position
+    Boid.prototype.update = function() {
+		// Update velocity
+        this.velocity.add(this.acceleration).limit(this.maxspeed); 
+        // update position
+        this.position.add(this.velocity);
+        // Reset accelertion to 0 each cycle
+        this.acceleration.multiplyScalar(0) ;
+    }
+
+    // steer away from nearby boids
+    Boid.prototype.separate = function(boids) {
+        var desiredSperation = 5.0 ; // how close is too close
+        var sum = new THREE.Vector3(0,0,0) ; // accumulate nearby
+        var boid ;
+        var count = 0 ;
+        for(var i=0; i<boids.length; i++) {
+            boid = boids[i] ;
+            var d = this.position.distanceTo(boid.position) ;
+            if(d>0 && d<desiredSperation) {
+                var away = new THREE.Vector3()
+                .subVectors(this.position, boid.position) // a vector pointing away
+                .normalize() // get unit vector
+                .divideScalar(d) ; // divide by distance
+                sum.add(away) ; // add to our accumulator
+                count ++ ;
+            }
+        }
+        if(count>0) {
+            sum.divideScalar(count) ;
+        }
+        return sum ;
+    }
+    // go with the flow of the flock
+    Boid.prototype.align = function(boids) {
+        var neighbor = 10.0 ; // how close is not close enough
+        var sum = new THREE.Vector3() ; // accumulate nearby
+        var boid ;
+        var count = 0 ;
+        for(var i=0; i<boids.length; i++) {
+            boid = boids[i] ;
+            var d = this.position.distanceTo(boid.position) ;
+            if(d>0 && d<neighbor) {
+                sum.add(boid.velocity) ; // add to our accumulator
+                count ++ ;
+            }
+        }
+        if(count>0) {
+            sum.divideScalar(count) ;
+            sum.limit(this.maxforce);
+        }
+        return sum ;
+    }
+   
+    Boid.prototype.cohesion = function(boids) {
+        var neighbour = 10.0 ; // how close is not close enough
+        var sum = new THREE.Vector3() ; // accumulate nearby
+        var boid ;
+        var count = 0 ;
+        for(var i=0; i<boids.length; i++) {
+            boid = boids[i] ;
+            var d = this.position.distanceTo(boid.position) ;
+            if(d>0 && d<neighbour) {
+                sum.add(boid.position) ; // add to our accumulator
+                count ++ ;
+            }
+        }
+        if(count>0) {
+            sum.divideScalar(count) ;
+            return this.steer(sum);  // Steer towards the location
+        }
+        return sum ;
+    }
+     // A method that calculates a steering vector towards a target
+     // second argument is if to slow down on approach
+    Boid.prototype.steer = function(target) {
+        var steer = new THREE.Vector3() ; // the steering vector
+        var desired = new THREE.Vector3()
+            .subVectors(target, this.position) // a vector pointing toward target
+        var d = desired.length() ;
+        if(d>0) {
+            desired.normalize()
+            .multiplyScalar(this.maxspeed) ;
+            steer.subVectors(desired, this.velocity) ;
+        }
+        return steer ;
+    }
+
+	var Colors = {
+		red:0xf25346,
+		white:0xd8d0d1,
+		green:0x33aa33,
+		brown:0x59332e,
+		pink:0xF5986E,
+		brownDark:0x23190f,
+		blue:0x68c3c0,
+	};
+
+
+
+	var box;
+
+	var theBoids = [] ;
+	var numBoids = 100 ;
+	
+	
+	window.onload = function() {
+		createPlanet() ;
+		createGround()
+		makeFlock() ;
+		//trees();
+		render();
+	}
+
+
+	
+	function makeFlock() {
+		for (var i = 0; i < numBoids; i++) {
+			theBoids[i] = new Boid() ;
+		}
+		theBoids[10].body.mesh.name = 'LittleBoids' ;
+		}
+
+
+	function onWindowResize() {
+		// handle user resizing the window
+		camera.aspect = window.innerWidth / window.innerHeight;
+		camera.updateProjectionMatrix();
+		renderer.setSize( window.innerWidth, window.innerHeight );
+	}
+
+	//center planet
+	function createPlanet(){
+		var geometry = new THREE.IcosahedronGeometry(9, 1);
+		var geometry2 = new THREE.IcosahedronGeometry(100, 1);
+		var geometry3 = new THREE.IcosahedronGeometry(150, 1);
+		var material = new THREE.MeshPhongMaterial( 
+			{ color:Colors.blue, shading:THREE.FlatShading} );
+		Planet = new THREE.Mesh( geometry, material );
+		Planet.position.y += 10;
+		Planet.position.z -= 70;
+		Planet.position.x += 20;
+		Planet.castShadow = true ;
+		Planet.name = 'PlanetMouse' ;
+		scene.add( Planet );
+		Planet2 = new THREE.Mesh( geometry2, material );
+		Planet2.position.y += 250;
+		Planet2.position.z -= 400;
+		Planet2.position.x -= 100;
+		Planet2.castShadow = true ;
+		
+		scene.add( Planet2 );
+		
+		Planet3 = new THREE.Mesh( geometry3, material );
+		Planet3.position.y += 600;
+		Planet3.position.z -= 1100;
+		Planet3.position.x += 230;
+		Planet3.castShadow = true ;
+		
+		scene.add( Planet3 );
+		
+		}
+		
+		
+	
+	
+	function createGround() {
+		var groundGeo = new THREE.PlaneGeometry( 200, 150,  10,10);
+		var material = new THREE.MeshPhongMaterial( { color:Colors.white, shading:THREE.FlatShading} );
+		
+		for (var i = 0; i < groundGeo.vertices.length; i++) {
+			groundGeo.vertices[i].z += Math.random() * 170 ;
+		}
+		
+		var mountain2 = new THREE.Mesh( groundGeo, material );
+		mountain2.receiveShadow = true;
+		mountain2.position.z -= 150;
+		mountain2.position.y -= 90;
+		scene.add( mountain2 );
+		var mountain = new THREE.Mesh( groundGeo, material );
+		mountain.receiveShadow = true;
+		mountain.position.z -= 300;
+		mountain.position.y -= 90;
+		scene.add( mountain );
+		
+		}
+    var treeDef = {
+        //variables : X F
+        //constants : + − ; : [ ]
+        numEpochs:4,
+        start  : 'X',
+        rules  : {'X':'F-[;[X+FX]+X+F]+F[+F]', 'F': 'F[-FX]',  
+        		'+':'+', '-':'-F', '[':'[', ']':']', ';':';', ':':':'},
+        		// F draw forward, X do nothing
+        		// - turn left, + turn right
+        angle  : Math.PI*0.25
+    }
+
+        var tree = Tree() ;
+		
+        scene.add(tree)
+
+    
+
+    function generateInstructions() {
+    	// create the list of tree bulding instructions
+    	var generation = treeDef.start ;
+    	// go over the number of epochs
+    	for (var i = 0; i < treeDef.numEpochs; i++) {
+    		var temp = '' ;
+    		// generate a new list for each generation
+    		for (var j = 0; j < generation.length; j++) {
+    			var spawn = treeDef.rules[generation[j]] ; // get the spawned sybols
+    			temp += spawn;
+    		}
+            //console.log(temp) ;
+    		generation = temp ; // a new generation
+    	}
+    	return generation ;
+    }
+
+    //
+    // Tree is where we build the tree
+    function Tree() {
+    	var instructions = generateInstructions() ;
+        var treeGroup = new THREE.Group() ;
+
+		var stackA = []; var stackV = [] ; // store positions and angles
+		var startpoint = new THREE.Vector3() ; // draw from
+        var endpoint = new THREE.Vector3(); // draw to
+        var angle = new THREE.Vector3() ; // at an angle
+
+		var limb = new THREE.Vector3(1,1,0) ; // a tree segment
+        var levelUp = true ;
+        // go through the generated instruction set
+    	for (var i = 0; i < instructions.length; i++) {
+    		var t = instructions[i]	 ;
+            switch(t){
+                case '+':
+                    angle.z += treeDef.angle ;
+                    break;
+                case '-':
+                    angle.z -= treeDef.angle ;
+                    break ;
+                case ';':
+                    angle.x += treeDef.angle ;
+                    break ;
+                case ':':
+                    angle.x -= treeDef.angle ;
+                    break;
+                case '[':// memorize current state
+        			stackV.push(startpoint.clone());            
+                	stackA.push(angle.clone());
+                    levelUp = true ;
+                    break;
+                case ']':// remeber previous state
+                    if(levelUp == true) {
+                        drawBud() ;
+                        levelUp = false ;
+                    }
+        			var point = stackV.pop();
+                    startpoint.copy(point);
+                    var a = stackA.pop();
+                    angle.copy(a) ;
+                    break;
+        		case 'F': // draw forward
+                    // create the endpoint based on euler angle
+                    var a = new THREE.Euler(angle.x, angle.y, angle.z, 'XYZ' );
+                    var rotator = limb.clone().applyEuler(a) ;
+              		endpoint.addVectors(startpoint, rotator);
+
+                    var bit = Limb() ;
+                    bit.position.copy(startpoint) ;
+                    bit.rotation.x = angle.x ;
+                    bit.rotation.y = angle.y ;
+                    bit.rotation.z = angle.z-treeDef.angle ;
+
+                    treeGroup.add(bit) ;
+        	        startpoint.copy(endpoint); // the next start point
+                    break ;
+                default:
+                    break ;
+    		} // end switch
+    	} // end for
+
+        // inner function to draw leaf
+        // called at pop
+        function drawBud() {
+			var random = Math.floor(Math.random()*3);
+			if(random == 2){
+			var bud = Leaf();
+			}else{
+            var bud = Bud() ;
+			}
+            bud.position.copy(startpoint) ;
+            bud.rotation.x = angle.x ;
+            bud.rotation.y = angle.y ;
+            treeGroup.add(bud) ;
+        }
+    	return treeGroup ;
+    }
+
+    function Limb() {
+        var height = 1.5 ;
+        var geometry = new THREE.CylinderGeometry( .09, .09, 1.5);
+        //geom.applyMatrix(new THREE.Matrix4().makeRotationZ(angle));
+        geometry.translate( 0, height/2, 0 ); // three.js r.72
+        var mat = new THREE.MeshPhongMaterial( { color:0x333333, shading:THREE.FlatShading} );
+        var mesh = new THREE.Mesh(geometry, mat) ;
+        return mesh  ;
+    }
+
+    function Bud() {
+        var geometry = new THREE.IcosahedronGeometry(0.3, 1) ;
+        var mat = new THREE.MeshPhongMaterial( { color:0xb30000, shading:THREE.FlatShading} );
+      
+        var mesh = new THREE.Mesh(geometry, mat) ;
+        return mesh  ;
+    }
+	
+	  function Leaf() {
+        var geometry = new THREE.IcosahedronGeometry(0.3, 1) ;
+        var mat = new THREE.MeshPhongMaterial( { color:0xff6666, shading:THREE.FlatShading} );
+      
+        var mesh = new THREE.Mesh(geometry, mat) ;
+        return mesh  ;
+    }
+	
+	
+	
+	
+
+	function render() {
+		requestAnimationFrame( render );
+		for (var i = 0; i < theBoids.length; i++) {
+			theBoids[i].run(theBoids) ;
+		}
+		var LittleBoids = scene.getObjectByName('LittleBoids') ;
+		//camera.lookAt(LittleBoids);
+		Planet.rotation.x +=0.009;
+		Planet.rotation.y +=0.009;
+		
+		Planet2.rotation.x +=0.0009;
+		Planet2.rotation.y +=0.0009;
+		
+		Planet3.rotation.x +=0.0009;
+		Planet3.rotation.y -=0.0005;
+		camera.lookAt(tree);
+		//renderer.render( scene, camera );
+		 effect.render( scene, camera );
+	}
+
+	// a simple limiting function on top of Vector3
+	THREE.Vector3.prototype.limit = function(max) {
+		if(this.length() > max) {
+			this.normalize() ;
+			this.multiplyScalar(max) ;
+			
+		}
+	}
+	
+
+
+
+
+
+		</script>
+	</body>
+</html>
+	  

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>COSC 114 -Lab 3</title>
+		<style>
+			body{
+				background: #333;
+			}
+		</style>
+		<script src="Snap.svg-0.4.1/dist/snap.svg.js"></script>
+	</head>
+
+	<body>
+		<script type ="text/javascript">
+			//Courtney Gosselin Lab 3 Basic Shapes and Design
+			//Canvas 
+			var s = Snap(800,600); 
+			//Shapes			
+			var backgroundTriangles = s.group(s.path("M 200 150 L 400 150 L 300 300 z"), s.path("M 200 450 L 400 450 L 300 300 z"));
+			var triangles = s.path("M 200 75 L 400 75 L 300 225 z");
+			var upsideDownTriangles = s.path("M 200 525 L 400 525 L 300 375 z");
+			var foregroundTri = s.group(s.path("M 200 600 L 400 600 L 300 450 z"), s.path("M 200 0 L 400 0 L 300 150 z"));
+			var centerSquare = s.path("M 225 300 L 300 225, L 375 300 L 300 375 z");
+			var circle = s.group(s.circle(300, 300, 100), s.circle(300, 300, 125));
+			var tinyCircle = s.group(s.circle(275, 205, 15), s.circle(400, 375, 10), s.circle(209, 385, 15));
+			var tinyPinkCircles = s.group(s.circle(175, 300, 13), s.circle(400, 225, 17));
+			
+			//Attribute
+				backgroundTriangles.attr({
+				fill: "#6AFFB7",
+				stroke: "grey",
+				strokeWidth: 5
+			});
+			
+			triangles.attr({
+				fill: "#B8F1F6",
+				stroke: "grey",
+				strokeWidth: 5
+			});
+			
+			upsideDownTriangles.attr({
+				fill: "#B8F1F6",
+				stroke: "grey",
+				strokeWidth: 5
+			});
+			
+			foregroundTri.attr({
+				fill: "#6AFFB7",
+				stroke: "grey",
+				strokeWidth: 5
+			});
+			
+			centerSquare.attr({
+				fill: "#B8F1F6",
+				stroke: "grey",
+				strokeWidth: 5
+			});
+			
+			circle.attr({
+				fill: "none",
+				stroke: "grey",
+				strokeWidth: 5
+			});
+			
+			tinyCircle.attr({
+				fill: "grey"
+			});
+			
+			tinyPinkCircles.attr({
+				fill: "#6AFFB7",
+				stroke: "grey",
+				strokeWidth: 3
+			});
+				
+		
+		</script>
+		
+	</body>
+</html>

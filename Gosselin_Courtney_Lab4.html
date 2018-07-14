@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<!-- Tribble the Gecko-->
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>COSC 114 -Lab 3</title>
+		<style>
+			body{
+				background: #333;
+			}
+		</style>
+		<script src="Snap.svg-0.4.1/dist/snap.svg.js"></script>
+	</head>
+
+	<body>
+		<script type ="text/javascript">
+			//Courtney Gosselin Lab 4 
+			//Canvas 
+			var s = Snap(800,600); 
+			//Body Parts
+			var eyelid = s.circle(302, 70, 20);
+			var shadow = s.path("M 150 500 L 345 500 L 340 450 L 20 440  L 10 450 z");
+			var head = s.circle(293, 95, 40);
+			var jaw = s.circle(315, 108, 30);
+			var centerSquare = s.path("M 293 60 L 330 82, L 350 100 L 355 130 L 300 125 z");
+			var noseHoles = s.circle(337, 105, 3);		
+			var whitesOfEyes = s.circle(280, 70, 20);
+			var eyeColour = s.circle(283, 70, 16);
+			var pupils = s.circle(285, 70, 9);
+			//Group of reflection in eyes
+			var eyeDetails = s.group(s.circle(282, 68, 3), s.circle(279, 65, 2));
+			var teeth = s.path("M 320 124 L 325 125 L 322 133 z");
+			var neck = s.path("M 255 100 L 300 100 L 270 160 L 240 160 z");
+			var jacketBody = s.path("M 150 500 L 345 500 L 340 450 L 285 140  L 245 125 z");
+			var jacketShadow = s.path("M 149 500 L 240 500 L 275 135  L 245 125 z");
+			var wand = s.path("M 270 325 L 340 300, L 340 302 L 270 325 z");
+			var hand = s.circle(250, 325, 20);
+			var jacketArm = s.path("M 243 150 L 280 160 L 290 310 L 210 340 z");
+			var jacketArmShadow = s.path("M 243 150 L 266 155 L 250 325 L 209 340 z");
+			//Group of spots
+			var spots = s.group(s.circle(270, 100, 3), s.circle(260, 93, 5), s.circle(260, 105, 2), s.circle(265, 107, 1), s.circle(257, 107, 1), s.circle(257, 103, 1), s.circle(307, 65, 3), s.circle(310, 70, 1), s.circle(315, 67, 4), s.circle(317, 75, 2), s.circle(320, 73, 1), s.circle(307, 74, 2), s.circle(312, 77, 1));
+			
+			//Attributes
+			//wand
+			wand.attr({
+				fill: "#663300",
+				stroke: "#663300",
+				strokeWidth: 3
+			});
+			//shadow
+			shadow.attr({
+				fill: "#0d0d0d",
+			});
+			
+			jacketArmShadow.attr({
+				fill: "#0d0d0d",
+			});
+			
+			//Head
+			spots.attr({
+				fill: "#003300",
+			});
+			
+			head.attr({ 
+				fill: "green",
+			});
+			
+			jaw.attr({
+				fill: "green",
+			});
+			
+			centerSquare.attr({
+				fill: "green",
+			});
+			
+			teeth.attr({
+				fill: "white",
+			});
+			
+			//Body
+			jacketShadow.attr({
+				fill: "#0d0d0d",
+			});
+			
+			jacketArm.attr({
+				fill: "#404040",
+			});
+			
+			neck.attr({
+				fill: "green",
+			});
+			
+			jacketBody.attr({
+				fill: "#4d4d4d",
+			});
+			
+			hand.attr({
+				fill: "green",
+			});
+			//Eyes
+			
+			noseHoles.attr({
+				fill: "black",
+			});
+			
+			whitesOfEyes.attr({
+				fill: "white",
+				stroke: "white",
+				strokeWidth: 5
+			});
+			
+			eyeColour.attr({
+				fill: "#00b8e6",
+			});
+			
+			pupils.attr({
+				fill: "black",
+				stroke: "black",
+				strokeWidth: 5
+			});
+			eyeDetails.attr({
+				fill: "white",
+			});
+			
+			eyelid.attr({ //Make darker 
+				fill: "#006600",
+			});
+		
+		</script>
+		
+	</body>
+</html>

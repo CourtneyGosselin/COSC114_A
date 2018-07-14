@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>COSC 114 -Lab 7</title>
+		<style>
+			body{
+				background: #333;
+			}
+		</style>
+		<script src="Snap.svg-0.4.1/dist/snap.svg.js"></script>
+	</head>
+
+	<body>
+		<script type ="text/javascript">
+			//Courtney Gosselin Lab 3 Basic Shapes and Design	
+			//Canvas 
+			var s = Snap(800,600); 
+			//Shapes			
+			var backgroundTriangles = s.group(s.path("M 200 150 L 400 150 L 300 300 z"), s.path("M 200 450 L 400 450 L 300 300 z"));
+			var triangles = s.path("M 200 75 L 400 75 L 300 225 z");
+			var upsideDownTriangles = s.path("M 200 525 L 400 525 L 300 375 z");
+			var foregroundTri = s.group(s.path("M 200 600 L 400 600 L 300 450 z"), s.path("M 200 0 L 400 0 L 300 150 z"));
+			var centerSquare = s.path("M 225 300 L 300 225, L 375 300 L 300 375 z");
+			var circle = s.group(s.circle(300, 300, 100), s.circle(300, 300, 125));
+			var tinyCircle = s.group(s.circle(275, 205, 15), s.circle(400, 375, 10), s.circle(209, 385, 15));
+			var tinyTealCircles = s.group(s.circle(175, 300, 13), s.circle(400, 225, 17));
+			var x = 1;
+			var teal = "#6AFFB7";
+			//Animate Functions:
+			//Rotate circles:
+			 function rotate() {
+				tinyCircle.animate({transform: "rotate("+360*x+" 300 300)"}, 7000);
+				tinyTealCircles.animate({transform: "rotate("+360*x+" 300 300)"}, 7000);	
+				x++;
+				setTimeout(rotate,7000); 
+			}
+			
+			//Spin diamond on mouse over
+			function spinIn(){
+				centerSquare.animate({transform: "s0.1,1"}, 1000, spinOut);
+				
+			}
+			function spinOut(){
+				centerSquare.animate({transform: "s1,1"}, 1000);
+			}
+			function colorChange(){
+				var tealO = document.querySelectorAll('[fill]');
+				for(var i = 0; i < tealO.length; i++){
+					console.log(tealO[i].getAttribute("fill"));
+					if(tealO[i].getAttribute("fill")=="#6affb7"){
+						tealO[i].setAttribute("fill", "pink");
+						}
+					/*if(tealO[i].getAttribute("fill")=="#B8F1F6"){
+						tealO[i].setAttribute("fill", "pink");
+						}*/
+						
+						}
+						
+				console.log(tealO.length);
+				
+				
+			}
+			
+			//Change colour on click
+			
+			//Animation call
+			//setInterval(rotate, 1);
+			rotate();
+			centerSquare.mouseover(spinIn);
+			centerSquare.mousedown(colorChange);
+			
+			//Attribute
+				backgroundTriangles.attr({
+				fill: teal,
+				stroke: "grey",
+				strokeWidth: 5
+			});
+			
+			triangles.attr({
+				fill: "#B8F1F6",
+				stroke: "grey",
+				strokeWidth: 5
+			});
+			
+			upsideDownTriangles.attr({
+				fill: "#B8F1F6",
+				stroke: "grey",
+				strokeWidth: 5
+			});
+			
+			foregroundTri.attr({
+				fill: teal,
+				stroke: "grey",
+				strokeWidth: 5
+			});
+			
+			centerSquare.attr({
+				fill: "#B8F1F6",
+				stroke: "grey",
+				strokeWidth: 5
+			});
+			
+			circle.attr({
+				fill: "none",
+				stroke: "grey",
+				strokeWidth: 5
+			});
+			
+			tinyCircle.attr({
+				fill: "grey"
+			});
+			
+			tinyTealCircles.attr({
+				fill: teal,
+				stroke: "grey",
+				strokeWidth: 3
+			});
+			
+					
+		
+		</script>
+		
+	</body>
+</html>
